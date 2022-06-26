@@ -4,6 +4,8 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import {store} from './app/store'
+import {Provider} from 'react-redux'
 import { ChakraProvider } from '@chakra-ui/react';
 
 const root = ReactDOM.createRoot(
@@ -11,9 +13,11 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <ChakraProvider>
-      <App />
-    </ChakraProvider>
+    <Provider store={store}>
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    </Provider>
   </React.StrictMode>
 );
 
