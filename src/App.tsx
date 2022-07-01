@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Text, Flex, VStack, StackDivider} from '@chakra-ui/react'
 import { useAppSelector, useAppDispatch } from './app/hooks';
 import {setTrue, setFalse} from './features/updateList/updateSlice'
@@ -18,35 +18,24 @@ function App(){
   const needUpdate = useAppSelector((state) => state.needUpdate.condition)
   const viewCompleted = useAppSelector((state) => state.viewComplete.condition)
   const currentList = useAppSelector((state) => state.trackList.currentList)
-  const needFilter = useAppSelector((state) => state.filterUpdate.condition)
 
   const [todoList, setTodoList] = useState<APIResponse[]>([])
-
   
   const dispatch = useAppDispatch();
-
-  const refreshList = () => {
+  const refreshList = useRef(() => {})
+  refreshList.current = () => {
     axios
     .get("/api/todos/")
-    .then((res) => {
-      dispatch(setCurrent(res.data))
+    .then(({data}) => {
+      dispatch(setCurrent(data))
     })
     .catch((err) => console.log(Error(err.message)))
   }
-
   useEffect(() => {
-    refreshList()
+    refreshList.current()
     dispatch(setFalse())
-    let tempList = currentList.filter((item) => item.isCompleted == viewCompleted)
-    setTodoList(tempList)
-  }, [(needUpdate == true), currentList])
-
- useEffect(() => {
-    let tempList = currentList.filter((item) => item.isCompleted == viewCompleted)
-    setTodoList(tempList)
-  }, [(viewCompleted), (needFilter == true)]) 
-  
-
+    setTodoList(currentList)
+  }, [(needUpdate == true), currentList.length])
   
   return (
     <div className="App">
@@ -64,7 +53,7 @@ function App(){
           alignItems='space-between'
           divider={<StackDivider borderColor='blackAlpha.100' />}
         >
-          {todoList.map((item, key) => {return(<TodoItem key={key} id={item.id} title={item.title} description={item.description} isCompleted={item.isCompleted}/>)})}
+          {todoList.map((item, key) => { if(item.isCompleted == viewCompleted) return(<TodoItem key={key} id={item.id} title={item.title} description={item.description} isCompleted={item.isCompleted}/>)})}
         </VStack>
       </TodoListContainer>
     </div>

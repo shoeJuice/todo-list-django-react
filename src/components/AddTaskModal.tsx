@@ -42,6 +42,7 @@ function AddTaskModal() {
   const createTask = (task: {}) => {
     axios
     .post("/api/todos/", task)
+    .then(({data}) => {console.log(data)})
     .finally(() => {
         dispatch(setTrue())
         onClose()
